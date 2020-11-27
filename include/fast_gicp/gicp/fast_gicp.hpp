@@ -69,8 +69,10 @@ public:
   virtual void clearTarget();
 
   virtual void setInputSource(const PointCloudSourceConstPtr& cloud) override;
+  virtual void setSourceCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs);
 
   virtual void setInputTarget(const PointCloudTargetConstPtr& cloud) override;
+  virtual void setTargetCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs);
 
 protected:
   virtual void computeTransformation(PointCloudSource& output, const Matrix4& guess) override;

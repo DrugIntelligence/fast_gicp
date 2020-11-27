@@ -102,7 +102,13 @@ void FastGICP<PointSource, PointTarget>::setInputSource(const PointCloudSourceCo
     return;
   }
   pcl::Registration<PointSource, PointTarget, Scalar>::setInputSource(cloud);
-  calculate_covariances(cloud, *source_kdtree, source_covs);
+  source_kdtree->setInputCloud(cloud);
+  source_covs.clear();
+}
+
+template<typename PointSource, typename PointTarget>
+void FastGICP<PointSource, PointTarget>::setSourceCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs) {
+  source_covs = covs;
 }
 
 template<typename PointSource, typename PointTarget>
@@ -111,11 +117,24 @@ void FastGICP<PointSource, PointTarget>::setInputTarget(const PointCloudTargetCo
     return;
   }
   pcl::Registration<PointSource, PointTarget, Scalar>::setInputTarget(cloud);
-  calculate_covariances(cloud, *target_kdtree, target_covs);
+  target_kdtree->setInputCloud(cloud);
+  target_covs.clear();
+}
+
+template<typename PointSource, typename PointTarget>
+void FastGICP<PointSource, PointTarget>::setTargetCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs) {
+  target_covs = covs;
 }
 
 template<typename PointSource, typename PointTarget>
 void FastGICP<PointSource, PointTarget>::computeTransformation(PointCloudSource& output, const Matrix4& guess) {
+  if(source_covs.size() != input_->size()) {
+    calculate_covariances(input_, *source_kdtree, source_covs);
+  }
+  if(target_covs.size() != target_->size()) {
+    calculate_covariances(target_, *target_kdtree, target_covs);
+  }
+
   Eigen::Isometry3d x0 = Eigen::Isometry3d(guess.template cast<double>());
 
   lm_lambda_ = -1.0;
