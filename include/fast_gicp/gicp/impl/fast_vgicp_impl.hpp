@@ -47,10 +47,7 @@ void FastVGICP<PointSource, PointTarget>::swapSourceAndTarget() {
   input_.swap(target_);
   source_kdtree.swap(target_kdtree);
   source_covs.swap(target_covs);
-
-  if(target_) {
-    create_voxelmap(target_);
-  }
+  voxels.clear();
 }
 
 template<typename PointSource, typename PointTarget>
@@ -60,7 +57,26 @@ void FastVGICP<PointSource, PointTarget>::setInputTarget(const PointCloudTargetC
   }
 
   FastGICP<PointSource, PointTarget>::setInputTarget(cloud);
-  create_voxelmap(cloud);
+  voxels.clear();
+}
+
+template<typename PointSource, typename PointTarget>
+void FastVGICP<PointSource, PointTarget>::setTargetCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs) {
+  FastGICP<PointSource, PointTarget>::setTargetCovariances(covs);
+  voxels.clear();
+}
+
+template<typename PointSource, typename PointTarget>
+void FastVGICP<PointSource, PointTarget>::computeTransformation(PointCloudSource& output, const Matrix4& guess) {
+  if(source_covs.size() != input_->size()) {
+    this->calculate_covariances(input_, *source_kdtree, source_covs);
+  }
+  if(target_covs.size() != target_->size()) {
+    this->calculate_covariances(target_, *target_kdtree, target_covs);
+  }
+  create_voxelmap(target_);
+
+  FastGICP<PointSource, PointTarget>::computeTransformation(output, guess);
 }
 
 template<typename PointSource, typename PointTarget>

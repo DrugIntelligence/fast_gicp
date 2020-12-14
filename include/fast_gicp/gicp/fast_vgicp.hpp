@@ -60,6 +60,11 @@ public:
 
   virtual void setInputTarget(const PointCloudTargetConstPtr& cloud) override;
 
+  virtual void setTargetCovariances(const std::vector<Eigen::Matrix4d, Eigen::aligned_allocator<Eigen::Matrix4d>>& covs) override;
+
+protected:
+  virtual void computeTransformation(PointCloudSource& output, const Matrix4& guess) override;
+
 private:
   void create_voxelmap(const PointCloudTargetConstPtr& cloud);
   std::vector<Eigen::Vector3i, Eigen::aligned_allocator<Eigen::Vector3i>> neighbor_offsets() const;
